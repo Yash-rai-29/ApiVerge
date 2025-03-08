@@ -59,3 +59,6 @@ apiverge/
 │   └── index.css               // Global styles (including Tailwind CSS)
 ├── package.json
 └── tailwind.config.js
+
+
+<!-- firebase deploy --only hosting:apiverge -->

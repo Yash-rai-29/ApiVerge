@@ -3,6 +3,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { QueryProvider } from './contexts/QueryContext';
 import PrivateRoute from './routes/PrivateRoute';
 import PublicOnlyRoute from './routes/PublicOnlyRoute';
 // Layouts
@@ -28,58 +29,65 @@ import Profiles from './pages/protected/Profiles';
 import Projects from './pages/protected/Projects';
 import Billings from './pages/protected/Billings';
 
+import Notifications from './components/common/Notifications';
+
+
 function App() {
   return (
-        <Routes>
-          {/* Public Routes */}
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/solutions" element={<Solutions />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/features" element={<Features />} />
-            <Route path="/terms" element={<Terms />} />
-            
-            {/* Public Routes that should redirect authenticated users */}
-            <Route 
-              path="/login" 
-              element={
-                <PublicOnlyRoute>
-                  <Login />
-                </PublicOnlyRoute>
-              } 
-            />
-            <Route 
-              path="/signup" 
-              element={
-                <PublicOnlyRoute>
-                  <SignUp />
-                </PublicOnlyRoute>
-              } 
-            />
-          </Route>
-
-          {/* Protected Routes */}
+    <AuthProvider>
+    <QueryProvider>
+      <Notifications />
+      <Routes>
+        {/* Public Routes */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/solutions" element={<Solutions />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/features" element={<Features />} />
+          <Route path="/terms" element={<Terms />} />
+          
+          {/* Public Routes that should redirect authenticated users */}
           <Route 
+            path="/login" 
             element={
-              <PrivateRoute>
-                <ProtectedLayout />
-              </PrivateRoute>
-            }
-          >
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/team" element={<Team />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/profiles" element={<Profiles />} />
-            <Route path="/projects" element={<Projects />} />
-            <Route path="/projects/:id" element={<Projects />} />
-            <Route path="/billings" element={<Billings />} />
-          </Route>
+              <PublicOnlyRoute>
+                <Login />
+              </PublicOnlyRoute>
+            } 
+          />
+          <Route 
+            path="/signup" 
+            element={
+              <PublicOnlyRoute>
+                <SignUp />
+              </PublicOnlyRoute>
+            } 
+          />
+        </Route>
 
-          {/* 404 - Not Found */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        {/* Protected Routes */}
+        <Route 
+          element={
+            <PrivateRoute>
+              <ProtectedLayout />
+            </PrivateRoute>
+          }
+        >
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/team" element={<Team />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/profiles" element={<Profiles />} />
+          <Route path="/projects/*" element={<Projects />} />
+          <Route path="/billings" element={<Billings />} />
+        </Route>
+
+        {/* 404 - Not Found */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </QueryProvider>
+  </AuthProvider>
   );
 }
 

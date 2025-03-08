@@ -325,7 +325,7 @@ const ProtectedLayout = () => {
         </AnimatePresence>
 
         {/* Main Content */}
-        <div className={`flex-1 overflow-x-hidden transition-all duration-300 ${sidebarOpen && !isMobile ? 'ml-64' : ''}`}>
+        <div className={`flex-1 overflow-x-hidden transition-all duration-300 ${sidebarOpen && !isMobile ? 'ml-6' : ''}`}>
           <AnimatePresence mode="wait">
             {pageLoading ? (
               <motion.div

@@ -158,7 +158,7 @@ def create_app(routers, root_path=''):
         fastapi_app.add_middleware(
             CORSMiddleware,
             allow_origins=allowed_origins_config,
-            allow_methods=["GET","POST","OPTIONS","HEAD","PATCH","DELETE"],
+            allow_methods=["GET","POST","OPTIONS","HEAD","PATCH","DELETE", "PUT"],
             allow_headers=["*"],
             expose_headers=["*"],
             max_age=24 * 60 * 60,  # seconds

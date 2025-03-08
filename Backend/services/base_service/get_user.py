@@ -8,7 +8,9 @@ def get_current_user(req: Request):
     try:
     
         token = req.headers["Authorization"].split(' ').pop()
+        # print(f'token:{token}')
         user = auth.verify_id_token(token)
+        # print(f'user:{user}')
         return user['uid']
     except Exception as e:
         print(f'Error in token validation:{e}')
