@@ -8,7 +8,7 @@ db = firestore.Client()
 
 USERS_COLLECTION = "users"
 
-def create_new_user(user_create: UserCreate, uid):
+def create_new_user(user_create: UserCreate):
     """Creates a new user in Firestore."""
     user_dict = user_create.dict()
     user_id = str(uuid4())
@@ -18,10 +18,12 @@ def create_new_user(user_create: UserCreate, uid):
     user_dict["updated_at"] = int(time.time())
     user_dict["subscription"] = Subscription().dict()
 
-    doc_ref = db.collection(USERS_COLLECTION).document(uid)
+    doc_ref = db.collection(USERS_COLLECTION).document(user_id)
     doc_ref.set(user_dict)
 
     user_snapshot = doc_ref.get()
+    print(f"User created with ID: {user_id}")
+    # Check if the user was created successfully
     if user_snapshot.exists:
         return UserResponse(**user_snapshot.to_dict())
     else:

@@ -9,10 +9,8 @@ from manage_user.manage_user_model import UserCreate, UserUpdate, UserResponse
 router = APIRouter()
 
 @router.post("/users", response_model=UserResponse, response_model_exclude_none=True, summary="Create a new user")
-def create_user_route(user: UserCreate, uid: str = Depends(get_current_user)):
-    if uid:
-        return create_new_user(user, uid)
-    raise incorrect_auth_cred_exception
+def create_user_route(user: UserCreate):
+    return create_new_user(user)
 
 @router.get("/users/me", response_model=UserResponse, response_model_exclude_none=True, summary="Get details of the current user")
 def get_me_route(uid: str = Depends(get_current_user)):
