@@ -1,70 +1,86 @@
-from pydantic import BaseModel, Field, validator
-from typing import Optional, List
-from enum import Enum
+from pydantic import BaseModel, Field, HttpUrl
+from typing import List, Optional, Dict, Any
+from datetime import datetime
+import uuid
 
-class ProjectType(str, Enum):
-    URL = "url"
-    FILE = "file"
+class ProjectBase(BaseModel):
+    name: str = Field(..., description="Name")
+    description: Optional[str] = Field(None, description="Description")
+    type: str = Field(..., description="Type")
+    account_type: str = Field(..., description="Account Type")
 
-class AccountType(str, Enum):
-    INDIVIDUAL = "individual"
-    ORGANIZATION = "organization"
+class ProjectCreate(ProjectBase):
+    openapi_url: Optional[HttpUrl] = Field(None, description="OpenAPI URL")
 
-class ProjectCreateRequest(BaseModel):
-    name: str = Field(..., description="Name of the project")
-    type: ProjectType = Field(..., description="Type of the project ('url' or 'file')")
-    account_type: AccountType = Field(..., description="Account type ('individual' or 'organization')")
-    description: Optional[str] = Field(None, description="Description of the project")
-    openapi_url: Optional[str] = Field(None, description="URL to OpenAPI specification file, required if type is 'url'")
-    openapi_file: Optional[str] = Field(None, description="Filename of uploaded OpenAPI specification file, required if type is 'file'")
+class ProjectUpdate(ProjectBase):
+    openapi_url: Optional[HttpUrl] = Field(None, description="OpenAPI URL")
 
-    @validator('openapi_url', always=True)
-    def check_openapi_url(cls, v, values):
-        if values.get('type') == ProjectType.URL and not v:
-            raise ValueError("openapi_url is required when type is 'url'")
-        return v
-
-    @validator('openapi_file', always=True)
-    def check_openapi_file(cls, v, values):
-        if values.get('type') == ProjectType.FILE and not v:
-            raise ValueError("openapi_file is required when type is 'file'")
-        return v
-
-class ProjectUpdateRequest(BaseModel):
-    name: Optional[str] = Field(None, description="Name of the project")
-    type: Optional[ProjectType] = Field(None, description="Type of the project ('url' or 'file')")
-    account_type: Optional[AccountType] = Field(None, description="Account type ('individual' or 'organization')")
-    description: Optional[str] = Field(None, description="Description of the project")
-    openapi_url: Optional[str] = Field(None, description="URL to OpenAPI specification file")
-    openapi_file: Optional[str] = Field(None, description="Filename of uploaded OpenAPI specification file")
-
-    @validator('openapi_url')
-    def validate_openapi_url(cls, v, values):
-        if 'type' in values and values['type'] == ProjectType.URL and not v:
-            raise ValueError("openapi_url is required when type is 'url'")
-        return v
-
-    @validator('openapi_file')
-    def validate_openapi_file(cls, v, values):
-        if 'type' in values and values['type'] == ProjectType.FILE and not v:
-            raise ValueError("openapi_file is required when type is 'file'")
-        return v
-
-class ProjectResponse(BaseModel):
-    project_uuid: str = Field(..., description="Unique ID of the project")
-    name: str = Field(..., description="Name of the project")
-    account_type: AccountType = Field(..., description="Account type ('individual' or 'organization')")
-    type: ProjectType = Field(..., description="Type of the project ('url' or 'file')")
-    description: Optional[str] = Field(None, description="Description of the project")
-    openapi_url: Optional[str] = Field(None, description="URL to OpenAPI specification file")
-    openapi_file: Optional[str] = Field(None, description="GCS path of uploaded OpenAPI specification file")
-    project_admin: str = Field(..., description="UID of the project administrator")
-    access_users: List[str] = Field(..., description="List of user UIDs with access to the project")
-    created_at: int = Field(..., description="Timestamp of project creation")
-    updated_at: int = Field(..., description="Timestamp of project last update")
+class ProjectResponse(ProjectBase):
+    id: str = Field(..., description="Project ID")
+    created_at: datetime = Field(..., description="Created At")
+    updated_at: Optional[datetime] = Field(None, description="Updated At")
+    status: str = Field("active", description="Status")
+    openapi_url: Optional[HttpUrl] = Field(None, description="OpenAPI URL")
+    endpoints_count: int = Field(0, description="Endpoints Count")
+    tests_count: int = Field(0, description="Tests Count")
 
     class Config:
         orm_mode = True
 
-class ProjectListResponse(BaseModel):
-    projects: List[ProjectResponse] = Field(..., description="List of projects")
+class ProjectEndpointParameter(BaseModel):
+    name: str = Field(..., description="Parameter Name")
+    in_field: str = Field(..., alias="in", description="Parameter In")
+    description: Optional[str] = Field(None, description="Description")
+    required: bool = Field(False, description="Required")
+    type: str = Field(..., description="Type")
+    schema_format: Optional[str] = Field(None, description="Schema Format")
+
+    class Config:
+        allow_population_by_field_name = True
+
+class ProjectEndpoint(BaseModel):
+    id: str = Field(..., description="Endpoint ID")
+    project_id: str = Field(..., description="Project ID")
+    path: str = Field(..., description="Path")
+    method: str = Field(..., description="Method")
+    tag: Optional[str] = Field(None, description="Tag")
+    description: Optional[str] = Field(None, description="Description")
+    parameters: Optional[List[ProjectEndpointParameter]] = Field(None, description="Parameters")
+    requestBody: Optional[Dict[str, Any]] = Field(None, description="Request Body")
+    responses: Optional[Dict[str, Any]] = Field(None, description="Responses")
+    test_count: int = Field(0, description="Test Count")
+    status: str = Field("active", description="Status")
+
+    class Config:
+        orm_mode = True
+
+class EndpointResponse(ProjectEndpoint):
+    pass
+
+class TestResult(BaseModel):
+    id: str = Field(..., description="Test Result ID")
+    endpoint_id: str = Field(..., description="Endpoint ID")
+    method: str = Field(..., description="Method")
+    path: str = Field(..., description="Path")
+    status: str = Field(..., description="Status")
+    response_time: float = Field(..., description="Response Time")
+    status_code: int = Field(..., description="Status Code")
+    assertions: List[Dict[str, Any]] = Field(..., description="Assertions")
+    error: Optional[str] = Field(None, description="Error")
+
+    class Config:
+        orm_mode = True
+
+class TestRun(BaseModel):
+    id: str = Field(..., description="Test Run ID")
+    project_id: str = Field(..., description="Project ID")
+    created_at: datetime = Field(..., description="Created At")
+    duration: float = Field(..., description="Duration")
+    total_tests: int = Field(..., description="Total Tests")
+    passed_tests: int = Field(..., description="Passed Tests")
+    failed_tests: int = Field(..., description="Failed Tests")
+    pass_rate: float = Field(..., description="Pass Rate")
+    results: Optional[List[TestResult]] = Field(None, description="Results")
+
+    class Config:
+        orm_mode = True

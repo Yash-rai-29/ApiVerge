@@ -3,7 +3,7 @@
 import apiClient from './apiConfig';
 
 // Base API path for projects
-const BASE_PATH = '/b/projects/projects';
+const BASE_PATH = '/b/projects/';
 
 export const projectsApi = {
   // Get all projects
@@ -14,7 +14,7 @@ export const projectsApi = {
   
   // Get a single project by ID
   getById: async (projectId) => {
-    const response = await apiClient.get(`${BASE_PATH}/${projectId}`);
+    const response = await apiClient.get(`${BASE_PATH}${projectId}`);
     return response.data;
   },
   
@@ -75,13 +75,13 @@ export const projectsApi = {
       formData.append('openapi_file', projectData.openapi_file);
     }
     
-    const response = await apiClient.put(`${BASE_PATH}/${projectId}`, formData);
+    const response = await apiClient.put(`${BASE_PATH}${projectId}`, formData);
     return response.data;
   },
   
   // Delete a project
   delete: async (projectId) => {
-    const response = await apiClient.delete(`${BASE_PATH}/${projectId}`);
+    const response = await apiClient.delete(`${BASE_PATH}${projectId}`);
     return response.data;
   },
   
@@ -97,19 +97,19 @@ export const projectsApi = {
       throw new Error('Invalid OpenAPI specification data');
     }
     
-    const response = await apiClient.post(`${BASE_PATH}/${projectId}/import-schema`, formData);
+    const response = await apiClient.post(`${BASE_PATH}${projectId}/import-schema`, formData);
     return response.data;
   },
   
   // Run tests for a project
   runTests: async (projectId, testConfig = {}) => {
-    const response = await apiClient.post(`${BASE_PATH}/${projectId}/run-tests`, testConfig);
+    const response = await apiClient.post(`${BASE_PATH}${projectId}/run-tests`, testConfig);
     return response.data;
   },
   
   // Get project performance metrics
   getPerformance: async (projectId, timeRange = '7d') => {
-    const response = await apiClient.get(`${BASE_PATH}/${projectId}/performance`, {
+    const response = await apiClient.get(`${BASE_PATH}${projectId}/performance`, {
       params: { timeRange }
     });
     return response.data;
@@ -117,13 +117,13 @@ export const projectsApi = {
   
   // Get project endpoints
   getEndpoints: async (projectId) => {
-    const response = await apiClient.get(`${BASE_PATH}/${projectId}/endpoints`);
+    const response = await apiClient.get(`${BASE_PATH}${projectId}/endpoints`);
     return response.data;
   },
   
   // Get test history for a project
   getTestHistory: async (projectId) => {
-    const response = await apiClient.get(`${BASE_PATH}/${projectId}/test-history`);
+    const response = await apiClient.get(`${BASE_PATH}${projectId}/test-history`);
     return response.data;
   }
 };

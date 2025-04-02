@@ -1,1 +1,7 @@
 Frontend/apiverge/.env
+Backend/services/base_service/__pycache__/
+Backend/services/base_service/aimodels/__pycache__/
+Backend/services/base_service/manage_user/__pycache__/
+Backend/services/base_service/user_check_by_email_id/__pycache__/
+Backend/services/base_service/projects/__pycache__/
+Backend/services/base_service/common_code/__pycache__/

@@ -5,9 +5,9 @@ from logging import Logger
 import os
 import json 
 from google.cloud import storage
-
+from pydantic_settings import BaseSettings
 from fastapi import Depends
-from pydantic import BaseSettings, Field
+from pydantic import Field
 
 from logconfig import get_logger
 from environment import Environment, get_environment
@@ -53,7 +53,7 @@ def get_storage_bucket(bucket_name) -> str :
 
 def get_project_id():
     # Python 3.7 only
-    project_id = os.getenv("GCP_PROJECT")
+    project_id = os.getenv("GCP_PROJECT", "your-gcp-project-id")  
 
     if not project_id:  
         # Check Google Metadata service

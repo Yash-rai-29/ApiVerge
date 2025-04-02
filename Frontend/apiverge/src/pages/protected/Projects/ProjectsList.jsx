@@ -14,17 +14,25 @@ const ProjectsList = () => {
   // Fetch projects data
   const { data, isLoading, error, refetch } = useProjects();
   
+  console.log("data", data);
   // Destructure projects from data, defaulting to an empty array if undefined or null
-  const projectsArray = Array.isArray(data?.projects) ? data.projects : [];
-  
-  // Local state for search term
+  const projectsArray =
+    data && Array.isArray(data.projects)
+      ? data.projects
+      : Array.isArray(data)
+      ? data
+      : [];
+
+  // Local state for search term.
   const [searchTerm, setSearchTerm] = useState('');
   const lowerSearchTerm = searchTerm.toLowerCase();
 
-  // Filter projects based on search term, handling missing name/description gracefully
+  // Filter projects based on search term, handling missing name/description gracefully.
   const filteredProjects = projectsArray.filter((project) => {
     const projectName = project.name ? project.name.toLowerCase() : '';
-    const projectDescription = project.description ? project.description.toLowerCase() : '';
+    const projectDescription = project.description
+      ? project.description.toLowerCase()
+      : '';
     return (
       projectName.includes(lowerSearchTerm) ||
       projectDescription.includes(lowerSearchTerm)
@@ -83,11 +91,11 @@ const ProjectsList = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProjects.map((project) => (
             <ProjectCard
-              key={project.project_uuid}
+              key={project.id}
               project={project}
-              onEdit={() => navigate(`/projects/${project.project_uuid}/edit`)}
-              onDelete={() => navigate(`/projects/${project.project_uuid}`)}
-              onClick={() => navigate(`/projects/${project.project_uuid}`)}
+              onEdit={() => navigate(`/projects/${project.id}/edit`)}
+              onDelete={() => navigate(`/projects/${project.id}`)}
+              onClick={() => navigate(`/projects/${project.id}`)}
             />
           ))}
         </div>

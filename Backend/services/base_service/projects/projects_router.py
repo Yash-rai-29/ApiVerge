@@ -1,158 +1,139 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Form, status
-from typing import Optional
-
-from projects.projects_model import (
-    ProjectCreateRequest,
-    ProjectResponse,
-    ProjectListResponse,
-    ProjectUpdateRequest,
-    ProjectType
-)
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Path, Query
+from typing import List, Optional, Dict, Any
+from pydantic import HttpUrl
+from projects.projects_model import ProjectResponse, EndpointResponse, TestRun
 from projects.projects import (
-    create_project,
-    get_all_projects,
-    get_project,
-    update_project,
-    delete_project
+    get_all_projects_service,
+    get_project_service,
+    create_project_service,
+    update_project_service,
+    delete_project_service,
+    get_project_endpoints_service,
+    import_openapi_schema_service,
+    run_project_tests_service,
+    get_project_test_history_service,
+    get_test_run_details_service,
+    get_project_performance_service
 )
-from get_user import get_current_user  # Ensure this is correctly implemented
-from common_code.common_exceptions import incorrect_auth_cred_exception  # Ensure this is correctly implemented
+from get_user import get_current_user
 
 router = APIRouter()
 
-@router.post(
-    "/projects",
-    response_model=ProjectResponse,
-    response_model_exclude_none=True,
-    summary="Create a new project"
-)
-async def create_project_api(
-    name: str = Form(..., description="Name of the project"),
-    type: ProjectType = Form(..., description="Type of the project ('url' or 'file')"),
-    account_type: str = Form(..., description="Account type ('individual' or 'organization')"),
-    description: Optional[str] = Form(None, description="Description of the project"),
-    openapi_url: Optional[str] = Form(None, description="URL to OpenAPI specification file, required if type is 'url'"),
-    openapi_file: Optional[UploadFile] = File(None, description="File upload for OpenAPI specification, required if type is 'file'"),
-    uid: str = Depends(get_current_user)
+@router.get("/", response_model=List[ProjectResponse])
+async def get_all_projects(current_user: str = Depends(get_current_user)):
+    return await get_all_projects_service(current_user)
+
+@router.get("/{project_uuid}", response_model=ProjectResponse)
+async def get_project(project_uuid: str = Path(...), current_user: str = Depends(get_current_user)):
+    project = await get_project_service(project_uuid, current_user)
+    if not project:
+        raise HTTPException(404)
+    return project
+
+@router.post("/", response_model=ProjectResponse)
+async def create_project(
+    name: str = Form(...),
+    type: str = Form(...),
+    account_type: str = Form(...),
+    description: Optional[str] = Form(None),
+    openapi_url: Optional[HttpUrl] = Form(None),
+    openapi_file: Optional[UploadFile] = File(None),
+    current_user: str = Depends(get_current_user)
 ):
-    if not uid:
-        raise incorrect_auth_cred_exception
+    if type == "url" and not openapi_url:
+        raise HTTPException(400)
+    if type == "file" and not openapi_file:
+        raise HTTPException(400)
+    return await create_project_service(current_user, name, description, type, account_type, openapi_url, openapi_file)
 
-    project_create_request = {
-        "name": name,
-        "type": type,
-        "account_type": account_type,
-        "description": description,
-        "openapi_url": openapi_url,
-        "openapi_file": openapi_file.filename if openapi_file else None,
-    }
-
-    file_content = None
-    filename = None
-    if type == ProjectType.FILE:
-        if not openapi_file:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="OpenAPI file is required when type is 'file'."
-            )
-        file_content = await openapi_file.read()
-        filename = openapi_file.filename
-
-    project_data = create_project(
-        uid=uid,
-        project_create_request=project_create_request,
-        file_content=file_content,
-        filename=filename
-    )
-
-    return ProjectResponse(**project_data)
-
-@router.get(
-    "/projects",
-    response_model=ProjectListResponse,
-    response_model_exclude_none=True,
-    summary="Get all projects for the user"
-)
-def get_all_projects_api(uid: str = Depends(get_current_user)):
-    if not uid:
-        raise incorrect_auth_cred_exception
-    project_list = get_all_projects(uid)
-    return ProjectListResponse(projects=[ProjectResponse(**project) for project in project_list])
-
-@router.get(
-    "/projects/{project_uuid}",
-    response_model=ProjectResponse,
-    response_model_exclude_none=True,
-    summary="Get a specific project"
-)
-def get_project_api(
-    project_uuid: str,
-    uid: str = Depends(get_current_user)
+@router.put("/{project_uuid}", response_model=ProjectResponse)
+async def update_project(
+    project_uuid: str = Path(...),
+    name: Optional[str] = Form(None),
+    type: Optional[str] = Form(None),
+    account_type: Optional[str] = Form(None),
+    description: Optional[str] = Form(None),
+    openapi_url: Optional[HttpUrl] = Form(None),
+    openapi_file: Optional[UploadFile] = File(None),
+    current_user: str = Depends(get_current_user)
 ):
-    if not uid:
-        raise incorrect_auth_cred_exception
-    project_data = get_project(uid, project_uuid)
-    return ProjectResponse(**project_data)
+    project = await get_project_service(project_uuid, current_user)
+    if not project:
+        raise HTTPException(404)
+    return await update_project_service(project_uuid, current_user, name, description, type, account_type, openapi_url, openapi_file)
 
-@router.put(
-    "/projects/{project_uuid}",
-    response_model=ProjectResponse,
-    response_model_exclude_none=True,
-    summary="Update an existing project"
-)
-async def update_project_api(
-    project_uuid: str,
-    name: Optional[str] = Form(None, description="Name of the project"),
-    type: Optional[ProjectType] = Form(None, description="Type of the project ('url' or 'file')"),
-    account_type: Optional[str] = Form(None, description="Account type ('individual' or 'organization')"),
-    description: Optional[str] = Form(None, description="Description of the project"),
-    openapi_url: Optional[str] = Form(None, description="URL to OpenAPI specification file"),
-    openapi_file: Optional[UploadFile] = File(None, description="Filename of uploaded OpenAPI specification file"),
-    uid: str = Depends(get_current_user)
+@router.delete("/{project_uuid}", response_model=Dict[str, str])
+async def delete_project(project_uuid: str = Path(...), current_user: str = Depends(get_current_user)):
+    project = await get_project_service(project_uuid, current_user)
+    if not project:
+        raise HTTPException(404)
+    await delete_project_service(project_uuid, current_user)
+    return {"message": "Project deleted"}
+
+@router.get("/{project_uuid}/endpoints", response_model=List[EndpointResponse])
+async def get_project_endpoints(project_uuid: str = Path(...), current_user: str = Depends(get_current_user)):
+    project = await get_project_service(project_uuid, current_user)
+    if not project:
+        raise HTTPException(404)
+    return await get_project_endpoints_service(project_uuid, current_user)
+
+@router.post("/{project_uuid}/import-schema", response_model=Dict[str, Any])
+async def import_openapi_schema(
+    project_uuid: str = Path(...),
+    openapi_url: Optional[HttpUrl] = Form(None),
+    openapi_file: Optional[UploadFile] = File(None),
+    current_user: str = Depends(get_current_user)
 ):
-    if not uid:
-        raise incorrect_auth_cred_exception
+    project = await get_project_service(project_uuid, current_user)
+    if not project:
+        raise HTTPException(404)
+    if not openapi_url and not openapi_file:
+        raise HTTPException(400)
+    return await import_openapi_schema_service(project_uuid, current_user, openapi_url, openapi_file)
 
-    updates = {}
-    if name is not None:
-        updates["name"] = name
-    if type is not None:
-        updates["type"] = type
-    if account_type is not None:
-        updates["account_type"] = account_type
-    if description is not None:
-        updates["description"] = description
-    if openapi_url is not None:
-        updates["openapi_url"] = openapi_url
-    if openapi_file is not None:
-        updates["openapi_file"] = openapi_file.filename
-
-    file_content = None
-    filename = None
-    if type == ProjectType.FILE and openapi_file:
-        file_content = await openapi_file.read()
-        filename = openapi_file.filename
-
-    updated_project = update_project(
-        uid=uid,
-        project_uuid=project_uuid,
-        updates=updates,
-        file_content=file_content,
-        filename=filename
-    )
-
-    return ProjectResponse(**updated_project)
-
-@router.delete(
-    "/projects/{project_uuid}",
-    response_model=dict,
-    summary="Delete a project"
-)
-def delete_project_api(
-    project_uuid: str,
-    uid: str = Depends(get_current_user)
+@router.post("/{project_uuid}/run-tests", response_model=TestRun)
+async def run_project_tests(
+    project_uuid: str = Path(...),
+    test_config: Dict[str, Any] = None,
+    current_user: str = Depends(get_current_user)
 ):
-    if not uid:
-        raise incorrect_auth_cred_exception
-    result = delete_project(uid, project_uuid)
-    return result
+    project = await get_project_service(project_uuid, current_user)
+    if not project:
+        raise HTTPException(404)
+    return await run_project_tests_service(project_uuid, current_user, test_config or {})
+
+@router.get("/{project_uuid}/test-history", response_model=List[TestRun])
+async def get_project_test_history(
+    project_uuid: str = Path(...),
+    limit: int = Query(10),
+    current_user: str = Depends(get_current_user)
+):
+    project = await get_project_service(project_uuid, current_user)
+    if not project:
+        raise HTTPException(404)
+    return await get_project_test_history_service(project_uuid, current_user, limit)
+
+@router.get("/{project_uuid}/test-runs/{run_id}", response_model=TestRun)
+async def get_test_run_details(
+    project_uuid: str = Path(...),
+    run_id: str = Path(...),
+    current_user: str = Depends(get_current_user)
+):
+    project = await get_project_service(project_uuid, current_user)
+    if not project:
+        raise HTTPException(404)
+    test_run = await get_test_run_details_service(project_uuid, run_id, current_user)
+    if not test_run:
+        raise HTTPException(404)
+    return test_run
+
+@router.get("/{project_uuid}/performance", response_model=Dict[str, Any])
+async def get_project_performance(
+    project_uuid: str = Path(...),
+    timeRange: str = Query("7d"),
+    current_user: str = Depends(get_current_user)
+):
+    project = await get_project_service(project_uuid, current_user)
+    if not project:
+        raise HTTPException(404)
+    return await get_project_performance_service(project_uuid, current_user, timeRange)

@@ -25,11 +25,14 @@ apiverge/
 │   │   │   ├── Header.jsx      // Common header for public pages
 │   │   │   ├── Footer.jsx      // Common footer for public pages
 │   │   │   └── Sidebar.jsx     // Optional sidebar for protected pages
+│   │   │   └── Notification.jsx
 │   │   └── layout/
 │   │       ├── PublicLayout.jsx    // Layout for public landing pages
 │   │       └── ProtectedLayout.jsx // Layout for authenticated pages (includes sidebar, header, etc.)
 │   ├── contexts/
 │   │   └── AuthContext.jsx     // Provides global authentication state and actions
+│   │   └── DataContext.jsx
+│   │   └── QueryContext.jsx
 │   ├── pages/
 │   │   ├── public/             // Public landing pages
 │   │   │   ├── Home.jsx
@@ -50,8 +53,12 @@ apiverge/
 │   │       └── Billings.jsx
 │   ├── routes/
 │   │   └── PrivateRoute.jsx    // Wrapper to protect routes requiring authentication
-│   ├── routes/
 │   │   └── PublicOnlyRoute.jsx  
+|   ├── stores/
+│   │   └── projectStore.jsx  
+│   │   └── uiStore.jsx  
+|   ├── hooks
+|   |   └── useProjects.jsx  
 │   ├── utils/
 │   │   └── firebaseInit.js     // Firebase configuration here
 │   ├── App.jsx                 // Main routing setup
