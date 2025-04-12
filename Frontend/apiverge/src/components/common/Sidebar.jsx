@@ -151,7 +151,7 @@ const Sidebar = ({ closeSidebar }) => {
           </div>
           
           {/* Favorites (Pinned Projects) */}
-          <div>
+          {/* <div>
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">
               Favorites
             </h3>
@@ -175,7 +175,7 @@ const Sidebar = ({ closeSidebar }) => {
                 onClick={closeSidebar}
               />
             </div>
-          </div>
+          </div> */}
         </nav>
       </div>
       

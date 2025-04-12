@@ -115,14 +115,14 @@ const ProtectedLayout = () => {
         <div className="flex h-full px-4 items-center justify-between">
           {/* Left Side - Logo and Menu Toggle */}
           <div className="flex items-center">
-            <button
+            {/* <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="p-2 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none"
               aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
             >
               {sidebarOpen ? <FaTimes /> : <FaBars />}
             </button>
-            
+             */}
             <div className="ml-4 flex items-center">
               <div className="h-8 w-8 rounded-md bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold">
                 A

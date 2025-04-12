@@ -4,7 +4,7 @@ import axios from 'axios';
 
 // Create an axios instance with default config
 const apiClient = axios.create({
-  baseURL: 'https://apiverge-base-515423273437.us-central1.run.app',
+  baseURL: 'http://localhost:5004/',
   headers: {
     'Content-Type': 'application/json',
   },

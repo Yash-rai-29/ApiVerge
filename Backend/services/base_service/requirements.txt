@@ -1,3 +1,5 @@
+# requirements.txt
+
 # Web app dependencies
 fastapi==0.79.0
 uvicorn==0.18.2
@@ -60,3 +62,4 @@ stripe
 mixpanel
 
 pydantic[email]
+

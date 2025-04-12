@@ -28,7 +28,6 @@ const Login = () => {
   
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
   const handleChange = (e) => {
@@ -42,14 +41,12 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-    setIsLoading(true);
     
     try {
       await login(form.email, form.password);
       navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Login failed. Please check your credentials and try again.');
-      setIsLoading(false);
     }
   };
   
@@ -86,7 +83,7 @@ const Login = () => {
                 className="flex items-start"
               >
                 <div className="bg-white bg-opacity-20 p-3 rounded-lg mr-4">
-                  <FaShieldAlt className="text-2xl" />
+                  <FaShieldAlt className="text-2xl fill-indigo-800" />
                 </div>
                 <div>
                   <h3 className="font-bold text-xl mb-1">Secure Testing Environment</h3>
@@ -101,7 +98,7 @@ const Login = () => {
                 className="flex items-start"
               >
                 <div className="bg-white bg-opacity-20 p-3 rounded-lg mr-4">
-                  <FaCode className="text-2xl" />
+                  <FaCode className="text-2xl fill-indigo-800" />
                 </div>
                 <div>
                   <h3 className="font-bold text-xl mb-1">Intelligent API Analysis</h3>
@@ -116,7 +113,7 @@ const Login = () => {
                 className="flex items-start"
               >
                 <div className="bg-white bg-opacity-20 p-3 rounded-lg mr-4">
-                  <FaRocket className="text-2xl" />
+                  <FaRocket className="text-2xl fill-indigo-800" />
                 </div>
                 <div>
                   <h3 className="font-bold text-xl mb-1">Streamlined Workflow</h3>

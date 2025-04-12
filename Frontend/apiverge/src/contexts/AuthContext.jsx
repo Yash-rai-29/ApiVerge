@@ -197,7 +197,7 @@ export const AuthProvider = ({ children }) => {
 
       // API call to create user in backend
       await axios.post(
-        'https://apiverge-base-515423273437.us-central1.run.app/b/user/users',
+        'http://localhost:5004/b/user/users',
         payload,
         {
           headers: {

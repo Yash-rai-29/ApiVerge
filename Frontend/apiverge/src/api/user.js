@@ -11,7 +11,7 @@ import axios from 'axios';
 export const createUserExternal = async (payload, idToken) => {
   try {
     const response = await axios.post(
-      'https://apiverge-base-515423273437.us-central1.run.app/b/user/users',
+      'http://localhost:5004/b/user/users',
       payload,
       {
         headers: {

@@ -1,3 +1,4 @@
+# confing.py
 """
 Configuration settings for the Base API
 """
@@ -5,9 +6,8 @@ from logging import Logger
 import os
 import json 
 from google.cloud import storage
-from pydantic_settings import BaseSettings
+from pydantic import Field, BaseSettings
 from fastapi import Depends
-from pydantic import Field
 
 from logconfig import get_logger
 from environment import Environment, get_environment

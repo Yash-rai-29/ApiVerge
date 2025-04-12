@@ -1,3 +1,4 @@
+# logconfig.py
 import structlog
 from structlog import BoundLogger
 

@@ -1,3 +1,4 @@
+# /app.py
 """
 Entrypoint for the base service
 """
@@ -141,7 +142,7 @@ def create_app(routers, root_path=''):
     
 
     if env == Environment.development:
-        allowed_origins_config = ["http://localhost:8080", "http://localhost:5173"]
+        allowed_origins_config = ["http://localhost:8080", "http://localhost:5173", "https://apiverge-web-app.web.app", "https://apiverge-web-app.firebaseapp.com"]
     else:
         response = get_config_sm('allowed-origins')
         allowed_origins_config = response.payload.data.decode("UTF-8")

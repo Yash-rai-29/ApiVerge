@@ -31,7 +31,6 @@ const SignUp = () => {
   });
   
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [formStep, setFormStep] = useState(1);
@@ -65,14 +64,12 @@ const SignUp = () => {
   const handleSignUp = async (e) => {
     e.preventDefault();
     setError('');
-    setIsLoading(true);
     
     try {
       await signUp(form);
       navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Sign-up failed');
-      setIsLoading(false);
     }
   };
   
