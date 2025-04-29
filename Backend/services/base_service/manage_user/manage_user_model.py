@@ -24,17 +24,9 @@ class SubscriptionStatus(str, Enum):
 class Subscription(BaseModel):
     plan: SubscriptionPlan = SubscriptionPlan.FREE
     status: SubscriptionStatus = SubscriptionStatus.TRIAL
-    trial_started_at: Optional[int] = Field(default_factory=lambda: int(time.time()), description="Unix timestamp of trial start")
-    trial_ends_at: Optional[int] = Field(None, description="Unix timestamp of trial end")
-    subscription_started_at: Optional[int] = Field(None, description="Unix timestamp of subscription start")
-    subscription_ends_at: Optional[int] = Field(None, description="Unix timestamp of subscription end")
+    started_at: Optional[int] = Field(default_factory=lambda: int(time.time()), description="Unix timestamp of trial start")
+    ends_at: Optional[int] = Field(None, description="Unix timestamp of trial end")
     auto_renew: bool = Field(False, description="Auto-renewal status for subscription")
-
-    @validator('trial_ends_at', pre=True, always=True)
-    def set_trial_end(cls, v, values):
-        if v is None and 'trial_started_at' in values:
-            return values['trial_started_at'] + (30 * 24 * 60 * 60)  # 30 days trial
-        return v
 
 class UserBase(BaseModel):
     email: EmailStr = Field(..., description="User's email address")
